@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>مدير الصيدلية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --surface2:#eef2f5; --text:#1b2530; --muted:#5f6b78; --line:#dde3e9;
+  --brand:#0f766e; --brand-soft:#d6f0ec;
+  --red:#c62828; --red-soft:#fde8e8; --amber:#b26a00; --amber-soft:#fff3d6;
+  --blue:#1d5fb8; --blue-soft:#e3eefc; --green:#2e7d32; --green-soft:#e3f4e4;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12171c; --surface:#1b2229; --surface2:#232c35; --text:#e6ebef; --muted:#9aa6b2; --line:#2e3943;
+    --brand:#2bb3a3; --brand-soft:#173b38;
+    --red:#ff7b7b; --red-soft:#3a1f22; --amber:#ffc35c; --amber-soft:#3a2f17;
+    --blue:#7fb2ff; --blue-soft:#1b2c44; --green:#7ed584; --green-soft:#1b3420; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12171c; --surface:#1b2229; --surface2:#232c35; --text:#e6ebef; --muted:#9aa6b2; --line:#2e3943;
+  --brand:#2bb3a3; --brand-soft:#173b38;
+  --red:#ff7b7b; --red-soft:#3a1f22; --amber:#ffc35c; --amber-soft:#3a2f17;
+  --blue:#7fb2ff; --blue-soft:#1b2c44; --green:#7ed584; --green-soft:#1b3420; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Cairo",system-ui,"Segoe UI",Tahoma,sans-serif;font-size:15px;line-height:1.6}
+header{background:var(--brand);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0}
+header .date{font-size:13px;opacity:.9}
+nav{display:flex;gap:4px;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--line);padding:6px 10px;position:sticky;top:48px;z-index:4;scrollbar-width:thin}
+nav button{flex:0 0 auto;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;padding:6px 10px;border-radius:8px;cursor:pointer;position:relative;white-space:nowrap}
+nav button.active{background:var(--brand-soft);color:var(--brand);font-weight:700}
+nav .dot{display:inline-block;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;line-height:18px;text-align:center;margin-inline-start:4px}
+main{max-width:980px;margin:0 auto;padding:14px 16px 80px}
+h2{font-size:17px;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+h2 .count{font-size:12px;background:var(--surface2);color:var(--muted);padding:0 8px;border-radius:10px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:640px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);cursor:pointer}
+.tile .n{font-size:26px;font-weight:700;line-height:1.2}
+.tile .l{font-size:13px;color:var(--muted)}
+.tile.red .n{color:var(--red)} .tile.amber .n{color:var(--amber)} .tile.blue .n{color:var(--blue)} .tile.green .n{color:var(--green)}
+.card{background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow)}
+.card.overdue{border-inline-start-color:var(--red)}
+.card.today{border-inline-start-color:var(--amber)}
+.card.upcoming{border-inline-start-color:var(--blue)}
+.card.done{border-inline-start-color:var(--green);opacity:.75}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card .title{font-weight:700}
+.card .meta{font-size:13px;color:var(--muted);margin-top:2px}
+.card .meta span{white-space:nowrap}
+.card .notes{font-size:13px;margin-top:4px;white-space:pre-wrap}
+.card .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;white-space:nowrap;background:var(--surface2);color:var(--muted)}
+.badge.red{background:var(--red-soft);color:var(--red)} .badge.amber{background:var(--amber-soft);color:var(--amber)}
+.badge.blue{background:var(--blue-soft);color:var(--blue)} .badge.green{background:var(--green-soft);color:var(--green)}
+.badge.brand{background:var(--brand-soft);color:var(--brand)}
+button.btn,.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:8px;padding:5px 12px;cursor:pointer}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.ok{background:var(--green-soft);border-color:transparent;color:var(--green);font-weight:700}
+.btn.danger{color:var(--red)}
+.btn.small{font-size:13px;padding:2px 10px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.toolbar input[type=search]{flex:1;min-width:160px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:16px;padding:2px 12px;cursor:pointer}
+.chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+input,select,textarea{font:inherit;font-size:15px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;width:100%}
+select.inline{width:auto;font-size:13px;padding:2px 6px}
+textarea{min-height:70px;resize:vertical}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+@media (max-width:560px){.grid2{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+dialog{border:0;border-radius:14px;padding:0;width:min(560px,calc(100vw - 24px));background:var(--surface);color:var(--text)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{padding:16px}
+dialog h3{margin:0 0 6px}
+dialog .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.empty{color:var(--muted);text-align:center;padding:16px;background:var(--surface);border:1px dashed var(--line);border-radius:10px;font-size:14px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.stat-row .tile{flex:1;min-width:120px;cursor:default}
+table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:10px;overflow:hidden;font-size:14px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
+th{background:var(--surface2);font-weight:600}
+.daygroup{margin:12px 0 4px;font-weight:700;color:var(--brand);font-size:14px}
+.daygroup.is-today{color:var(--amber)}
+details summary{cursor:pointer;font-size:12px;color:var(--muted)}
+details ul{margin:4px 0;padding-inline-start:18px;font-size:12px;color:var(--muted)}
+.banner{background:var(--amber-soft);color:var(--amber);border-radius:10px;padding:8px 12px;font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.section{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.hint{font-size:13px;color:var(--muted)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:20px;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media print{header,nav,.actions,.toolbar,.quick{display:none!important}main{padding:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>💊 مدير الصيدلية <span id="branchName" style="font-weight:400;font-size:14px"></span></h1>
+  <div class="date" id="todayLbl"></div>
+</header>
+<nav id="tabs"></nav>
+<main id="view"></main>
+<dialog id="dlg"><form id="dlgForm" method="dialog"></form></dialog>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= أدوات التاريخ ================= */
+const DAY = 86400000;
+const AR_DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const AR_MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const today = () => ymd(new Date());
+const addDays = (s,n) => { const d = parse(s); d.setDate(d.getDate()+n); return ymd(d); };
+const diffDays = (a,b) => Math.round((parse(a) - parse(b)) / DAY);
+const lastDay = (y,m) => new Date(y, m+1, 0).getDate();
+const fmt = s => { if(!s) return ''; const d = parse(s.slice(0,10)); return `${AR_DAYS[d.getDay()]} ${d.getDate()} ${AR_MONTHS[d.getMonth()]}`; };
+const nowLocal = () => { const d = new Date(); return `${ymd(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtTime = s => s ? s.slice(11,16) : '';
+const minsBetween = (a,b) => (new Date(b) - new Date(a)) / 60000;
+function rel(due){
+  const n = diffDays(due, today());
+  if(n < 0) return `متأخر ${-n} يوم`;
+  if(n === 0) return 'اليوم';
+  if(n === 1) return 'غداً';
+  return `بعد ${n} يوم`;
+}
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+const money = v => num(v).toLocaleString('en-US', {maximumFractionDigits:2});
+const cashDiff = it => num(it.cash) + num(it.cards) + num(it.credit) + num(it.expenses) - num(it.system);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+/* ================= تعريف الأقسام ================= */
+const EMP_LIST = '__employees__';
+const MODULES = {
+  hr: {
+    title:'شؤون العاملين', icon:'👥',
+    statuses:['جديد','جاري التجهيز','تم الإرسال','بانتظار الرد','تم التسليم / مغلق'],
+    closed:['تم التسليم / مغلق'],
+    fields:[
+      {k:'direction', label:'نوع الطلب من حيث الجهة', type:'select', options:['موظف يطلب ← من شؤون العاملين','شؤون العاملين تطلب ← مني']},
+      {k:'employee', label:'اسم الموظف', type:'text', list:EMP_LIST, req:true},
+      {k:'type', label:'المطلوب', type:'text', req:true, list:['شهادة مفردات مرتب','شهادة خبرة','طلب إجازة','إجازة مرضية','إجازة بدون أجر','سلفة','استمارة تأمينات','كارنيه / بدل فاقد','صورة بطاقة','فيش وتشبيه','شهادة صحية','مستندات تعيين جديد','استقالة','طلب نقل','تحقيق / جزاء','تعديل بيانات','أخرى']},
+      {k:'date', label:'تاريخ الطلب', type:'date', def:'today'},
+      {k:'due', label:'مطلوب قبل / تاريخ المتابعة', type:'date'},
+      {k:'ref', label:'المسؤول في شؤون العاملين / رقم مرجعي', type:'text'},
+      {k:'notes', label:'ملاحظات', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.type || ''} — ${it.employee || ''}`,
+    metaKeys:['direction','date','ref'],
+  },
+  purchasing: {
+    title:'المشتريات', icon:'🛒',
+    statuses:['جديد','تم الإرسال للمشتريات','قيد المتابعة','تم التوريد / مغلق','مرفوض / ملغي'],
+    closed:['تم التوريد / مغلق','مرفوض / ملغي'],
+    fields:[
+      {k:'item', label:'الصنف / الموضوع', type:'text', req:true},
+      {k:'type', label:'نوع الطلب', type:'select', options:['نواقص','صنف خاص لعميل','كمية إضافية','مرتجع','تسعير / فرق سعر','كود صنف جديد','مستهلكات','أخرى']},
+      {k:'qty', label:'الكمية', type:'text'},
+      {k:'customer', label:'العميل (إن وجد) / تليفون', type:'text'},
+      {k:'contact', label:'مسؤول المشتريات / المورد', type:'text'},
+      {k:'ref', label:'رقم الطلب', type:'text'},
+      {k:'date', label:'تاريخ الطلب', type:'date', def:'today'},
+      {k:'due', label:'تاريخ المتابعة', type:'date', def:'+2'},
+      {k:'notes', label:'ملاحظات', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.item || ''}${it.qty ? ' × ' + it.qty : ''}`,
+    metaKeys:['type','customer','contact','ref','date'],
+  },
+  orders: {
+    title:'الأوردرات', icon:'📦',
+    statuses:['قيد التحضير','جاهز','تم التسليم','ملغي'],
+    closed:['تم التسليم','ملغي'],
+    fields:[
+      {k:'num', label:'رقم الأوردر', type:'text'},
+      {k:'channel', label:'نوع الأوردر', type:'select', options:['توصيل منزلي','تليفون','أونلاين / تطبيق','واتساب','عميل بالفرع','تحويل من فرع']},
+      {k:'customer', label:'العميل / ملاحظة', type:'text'},
+      {k:'preparer', label:'المُحضِّر', type:'text', list:EMP_LIST},
+      {k:'received', label:'وقت الاستلام', type:'datetime-local', def:'now'},
+      {k:'ready', label:'وقت الانتهاء من التحضير', type:'datetime-local'},
+      {k:'delivered', label:'وقت التسليم / الخروج', type:'datetime-local'},
+      {k:'notes', label:'ملاحظات (نواقص، تأخير...)', type:'textarea', full:true},
+    ],
+    titleOf: it => `أوردر ${it.num ? '#' + it.num : ''} ${it.customer ? '— ' + it.customer : ''}`,
+    metaKeys:['channel','preparer'],
+  },
+  inventory: {
+    title:'الجرد', icon:'📋', dueLabel:'التسليم',
+    statuses:['مخطط','جاري','تم — بانتظار التسوية','تمت التسوية / مغلق'],
+    closed:['تمت التسوية / مغلق'],
+    fields:[
+      {k:'type', label:'نوع الجرد', type:'text', req:true, list:['جرد شهري','جرد سنوي','جرد مفاجئ','جرد جزئي (مجموعة / رف)','جرد ثلاجة','جرد جداول ومخدرات','جرد مستهلكات','جرد خزينة','جرد مستلزمات / تجميل']},
+      {k:'scope', label:'النطاق (أصناف / رفوف / مجموعة)', type:'text'},
+      {k:'date', label:'تاريخ الجرد', type:'date', def:'today'},
+      {k:'team', label:'القائم بالجرد / لجنة الجرد', type:'text'},
+      {k:'due', label:'موعد تسليم النتيجة / التسوية', type:'date', def:'+2'},
+      {k:'diffCount', label:'عدد الأصناف بها فروق', type:'number'},
+      {k:'shortage', label:'قيمة العجز', type:'number'},
+      {k:'surplus', label:'قيمة الزيادة', type:'number'},
+      {k:'notes', label:'ملاحظات وأسباب الفروق', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.type || 'جرد'}${it.scope ? ' — ' + it.scope : ''}`,
+    metaKeys:['date','team','diffCount'],
+    extra: it => {
+      const sh = num(it.shortage), su = num(it.surplus);
+      return (sh ? `<span class="badge red">عجز ${money(sh)}</span> ` : '') + (su ? `<span class="badge blue">زيادة ${money(su)}</span> ` : '') + (sh - su ? `<span class="badge ${sh>su?'red':'green'}">الصافي ${sh>su?'عجز':'زيادة'} ${money(Math.abs(sh-su))}</span>` : '');
+    },
+    header: () => {
+      const y = String(new Date().getFullYear());
+      const list = S.items.inventory.filter(it => (it.date||'').startsWith(y));
+      const sh = list.reduce((a,it) => a + num(it.shortage), 0), su = list.reduce((a,it) => a + num(it.surplus), 0);
+      const lastDone = S.items.inventory.filter(it => isClosed('inventory',it) || it.status.startsWith('تم')).map(it => it.date).sort().pop();
+      return `<div class="stat-row">
+        <div class="tile"><div class="n">${list.length}</div><div class="l">عمليات جرد ${y}</div></div>
+        <div class="tile red"><div class="n">${money(sh)}</div><div class="l">إجمالي العجز ${y}</div></div>
+        <div class="tile blue"><div class="n">${money(su)}</div><div class="l">إجمالي الزيادة ${y}</div></div>
+        <div class="tile"><div class="n" style="font-size:16px">${lastDone ? fmt(lastDone) : '-'}</div><div class="l">آخر جرد منتهي</div></div>
+      </div><p class="hint">لو عندك ميعاد جرد ثابت كل شهر، أضفه من الإعدادات ← المواعيد الثابتة.</p>`;
+    },
+  },
+  cash: {
+    title:'الخزينة والنقدية', icon:'💰', dueLabel:'التوريد',
+    statuses:['لم يتم التوريد','تم التوريد / مغلق'],
+    closed:['تم التوريد / مغلق'],
+    fields:[
+      {k:'date', label:'تاريخ التقفيلة', type:'date', def:'today', req:true},
+      {k:'shift', label:'الوردية', type:'select', options:['يوم كامل','صباحي','مسائي','ليلي']},
+      {k:'cashier', label:'الكاشير / المسؤول', type:'text', list:EMP_LIST},
+      {k:'system', label:'إجمالي مبيعات السيستم', type:'number', req:true},
+      {k:'cash', label:'النقدية الفعلية بالدرج', type:'number'},
+      {k:'cards', label:'فيزا / محافظ / إنستاباي', type:'number'},
+      {k:'credit', label:'آجل / تأمين / تعاقدات', type:'number'},
+      {k:'expenses', label:'مصروفات دُفعت من الدرج', type:'number'},
+      {k:'deposited', label:'المبلغ المورّد', type:'number'},
+      {k:'depositRef', label:'رقم إيصال التوريد / لمن', type:'text'},
+      {k:'due', label:'موعد التوريد', type:'date', def:'today'},
+      {k:'notes', label:'ملاحظات (سبب العجز / الزيادة...)', type:'textarea', full:true},
+    ],
+    titleOf: it => `تقفيلة ${fmt(it.date)} — ${it.shift || ''}`,
+    metaKeys:['cashier','depositRef'],
+    extra: it => {
+      const d = cashDiff(it);
+      return `<span>السيستم: ${money(it.system)}</span> · <span>نقدي: ${money(it.cash)}</span>${num(it.cards)?` · <span>فيزا/محافظ: ${money(it.cards)}</span>`:''}${num(it.credit)?` · <span>آجل: ${money(it.credit)}</span>`:''}${num(it.expenses)?` · <span>مصروفات: ${money(it.expenses)}</span>`:''}${num(it.deposited)?` · <span>مورّد: ${money(it.deposited)}</span>`:''}
+        <span class="badge ${Math.abs(d)<0.01?'green':d<0?'red':'blue'}">${Math.abs(d)<0.01?'مطابق ✔':d<0?'عجز '+money(-d):'زيادة '+money(d)}</span>`;
+    },
+    header: () => {
+      const m = today().slice(0,7);
+      const list = S.items.cash.filter(it => (it.date||'').startsWith(m));
+      const sales = list.reduce((a,it) => a + num(it.system), 0);
+      const diffs = list.map(cashDiff);
+      const short = diffs.filter(d => d < 0).reduce((a,b) => a - b, 0), over = diffs.filter(d => d > 0).reduce((a,b) => a + b, 0);
+      const pend = S.items.cash.filter(it => !isClosed('cash',it));
+      const pendAmt = pend.reduce((a,it) => a + Math.max(0, num(it.cash) - num(it.deposited)), 0);
+      return `<div class="stat-row">
+        <div class="tile"><div class="n">${money(sales)}</div><div class="l">مبيعات الشهر (${list.length} تقفيلة)</div></div>
+        <div class="tile ${short?'red':'green'}"><div class="n">${money(short)}</div><div class="l">إجمالي العجز هذا الشهر</div></div>
+        <div class="tile blue"><div class="n">${money(over)}</div><div class="l">إجمالي الزيادة هذا الشهر</div></div>
+        <div class="tile ${pend.length?'amber':'green'}"><div class="n">${money(pendAmt)}</div><div class="l">نقدية لم تُورَّد (${pend.length})</div></div>
+      </div><p class="hint">الفرق = النقدي + الفيزا/المحافظ + الآجل + المصروفات − مبيعات السيستم. سجّل تقفيلة كل يوم، والتطبيق ينبّهك لو يوم فات من غير تقفيلة أو نقدية متأخرة في التوريد.</p>`;
+    },
+  },
+  petty: {
+    title:'العهدة والنثريات', icon:'🧾', dueLabel:'التسوية',
+    statuses:['لم تُسوَّ','أُرسلت للتسوية','تمت التسوية / مغلق'],
+    closed:['تمت التسوية / مغلق'],
+    fields:[
+      {k:'item', label:'البند', type:'text', req:true},
+      {k:'amount', label:'المبلغ', type:'number', req:true},
+      {k:'cat', label:'التصنيف', type:'text', list:['نظافة','بوفيه / ضيافة','مواصلات','دليفري','صيانة بسيطة','أدوات مكتبية','تصوير / طباعة','كهرباء / مياه','أخرى']},
+      {k:'date', label:'التاريخ', type:'date', def:'today'},
+      {k:'receipt', label:'الإيصال', type:'select', options:['يوجد إيصال','لا يوجد إيصال']},
+      {k:'due', label:'موعد إرسال التسوية', type:'date'},
+      {k:'notes', label:'ملاحظات', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.item || ''} — ${money(it.amount)}`,
+    metaKeys:['cat','date','receipt'],
+    extra: it => it.receipt === 'لا يوجد إيصال' ? '<span class="badge amber">بدون إيصال</span>' : '',
+    header: () => {
+      const limit = num(S.settings.pettyLimit);
+      const unsettled = S.items.petty.filter(it => !isClosed('petty',it)).reduce((a,it) => a + num(it.amount), 0);
+      const rem = limit - unsettled;
+      const noRec = S.items.petty.filter(it => !isClosed('petty',it) && it.receipt === 'لا يوجد إيصال').length;
+      return `<div class="stat-row">
+        <div class="tile"><div class="n">${money(limit)}</div><div class="l">قيمة العهدة</div></div>
+        <div class="tile amber"><div class="n">${money(unsettled)}</div><div class="l">مصروف لم يُسوَّ</div></div>
+        <div class="tile ${limit && rem < limit*0.2 ? 'red' : 'green'}"><div class="n">${money(rem)}</div><div class="l">المتبقي في العهدة${limit && rem < limit*0.2 ? ' — اعمل تسوية' : ''}</div></div>
+        <div class="tile ${noRec?'red':''}"><div class="n">${noRec}</div><div class="l">بنود بدون إيصال</div></div>
+      </div><p class="hint">حدد قيمة العهدة من الإعدادات. لما ترسل التسوية غيّر حالة البنود إلى «أُرسلت للتسوية»، ولما تستلم المبلغ اجعلها «تمت التسوية».</p>`;
+    },
+  },
+  maintenance: {
+    title:'الصيانة', icon:'🔧',
+    statuses:['تم الإبلاغ','تم إرسال فني','قيد الإصلاح','مؤجل','تم الإصلاح / مغلق'],
+    closed:['تم الإصلاح / مغلق'],
+    fields:[
+      {k:'issue', label:'العطل / المطلوب', type:'text', req:true},
+      {k:'cat', label:'النوع', type:'select', options:['تكييف','كهرباء وإضاءة','ثلاجة أدوية','سباكة','كمبيوتر / سيستم / طابعة','كاميرات / إنذار','نجارة / أثاث','لافتة / واجهة','نظافة','أخرى']},
+      {k:'priority', label:'الأولوية', type:'select', options:['عادي','عاجل','منخفض']},
+      {k:'date', label:'تاريخ الإبلاغ', type:'date', def:'today'},
+      {k:'ticket', label:'رقم البلاغ / من تم إبلاغه', type:'text'},
+      {k:'tech', label:'الفني / الشركة', type:'text'},
+      {k:'due', label:'تاريخ المتابعة', type:'date', def:'+1'},
+      {k:'cost', label:'التكلفة', type:'text'},
+      {k:'notes', label:'ملاحظات', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.issue || ''}`,
+    metaKeys:['cat','priority','date','ticket','tech','cost'],
+  },
+  contracts: {
+    title:'التعاقدات', icon:'📄',
+    statuses:['ساري','قيد التجديد','منتهي / ملغي'],
+    closed:['منتهي / ملغي'],
+    fields:[
+      {k:'name', label:'اسم التعاقد', type:'text', req:true},
+      {k:'type', label:'النوع', type:'text', list:['إيجار','شركة تأمين طبي','شركة نظافة','أمن','صيانة تكييف','مكافحة حشرات','إنترنت / تليفون','كهرباء / مياه','ترخيص','توريد','أخرى']},
+      {k:'party', label:'الطرف الآخر', type:'text'},
+      {k:'contact', label:'التواصل (اسم / تليفون)', type:'text'},
+      {k:'start', label:'تاريخ البداية', type:'date'},
+      {k:'end', label:'تاريخ الانتهاء', type:'date', req:true},
+      {k:'value', label:'القيمة', type:'text'},
+      {k:'warn', label:'نبهني قبل الانتهاء بـ (يوم)', type:'number', def:'settings.contractWarnDays'},
+      {k:'notes', label:'ملاحظات', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.name || ''}`,
+    metaKeys:['type','party','contact','start','value'],
+  },
+  tasks: {
+    title:'مهام ومتابعات', icon:'✅',
+    statuses:['مفتوحة','جاري','تمت'],
+    closed:['تمت'],
+    fields:[
+      {k:'title', label:'المهمة', type:'text', req:true},
+      {k:'cat', label:'التصنيف', type:'text', list:['إدارة الفرع','الإدارة / المنطقة','جرد','تفتيش / جودة','عملاء وشكاوى','تدريب','خزينة','أخرى']},
+      {k:'priority', label:'الأولوية', type:'select', options:['عادي','عاجل','منخفض']},
+      {k:'due', label:'الموعد', type:'date', def:'today'},
+      {k:'notes', label:'ملاحظات', type:'textarea', full:true},
+    ],
+    titleOf: it => it.title || '',
+    metaKeys:['cat','priority'],
+  },
+};
+const MOD_KEYS = Object.keys(MODULES);
+const fieldOf = (mod,k) => MODULES[mod].fields.find(f => f.k === k);
+const isClosed = (mod,it) => MODULES[mod].closed.includes(it.status);
+
+/* ================= المواعيد الثابتة (الافتراضية) ================= */
+function defaultRules(){
+  const c = today();
+  return [
+    {id:'r_vac',  title:'إرسال شيت الإجازات لشؤون العاملين', cat:'شؤون العاملين', type:'monthlyDays',   days:[10,21,31], note:'يوم 31 = آخر يوم في الشهر تلقائياً', createdAt:c},
+    {id:'r_eval', title:'إرسال تقييمات الموظفين',            cat:'شؤون العاملين', type:'monthlyWindow', from:16, to:18, note:'', createdAt:c},
+    {id:'r_stag', title:'عمل شيت رواكد المعمل',              cat:'المعمل',        type:'monthlyWindow', from:10, to:17, note:'', createdAt:c},
+    {id:'r_exp',  title:'إخراج اكسباير المعمل',              cat:'المعمل',        type:'monthlyWindow', from:10, to:17, note:'', createdAt:c},
+    {id:'r_cons', title:'عمل طلبية المستهلكات',              cat:'المشتريات',     type:'weekly',        weekday:2, note:'', createdAt:c},
+    {id:'r_sal',  title:'إرسال تقفيلة المرتبات',             cat:'شؤون العاملين', type:'monthlyWindow', from:21, to:24, note:'', createdAt:c},
+  ];
+}
+function ruleDesc(r){
+  if(r.type === 'weekly') return `كل ${AR_DAYS[r.weekday]}`;
+  if(r.type === 'monthlyWindow') return `من يوم ${r.from} إلى يوم ${r.to} كل شهر`;
+  return `أيام ${r.days.join(' و ')} من كل شهر`;
+}
+
+/* ================= الحفظ ================= */
+const STORE_KEY = 'pharmacy_manager_v1';
+let S;
+function blankState(){
+  const items = {}; MOD_KEYS.forEach(k => items[k] = []);
+  return { rules: defaultRules(), done:{}, items, employees:[], settings:{branch:'', orderTarget:30, contractWarnDays:30, pettyLimit:0, theme:'auto'}, lastBackup:null };
+}
+function load(){
+  let raw = null;
+  try { raw = localStorage.getItem(STORE_KEY); } catch(e){}
+  S = blankState();
+  if(raw){ try { S = normalize(JSON.parse(raw)); } catch(e){ console.error(e); } }
+}
+function normalize(d){
+  const b = blankState();
+  const n = Object.assign(b, d);
+  n.items = Object.assign(blankState().items, d.items || {});
+  n.settings = Object.assign(blankState().settings, d.settings || {});
+  n.done = d.done || {}; n.employees = d.employees || []; n.rules = Array.isArray(d.rules) ? d.rules : defaultRules();
+  return n;
+}
+let storageOk = true;
+function save(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); storageOk = true; }
+  catch(e){ storageOk = false; toast('⚠️ تعذر الحفظ على هذا الجهاز — صدّر نسخة احتياطية'); }
+}
+
+/* ================= حساب المواعيد المتكررة ================= */
+function occurrences(from, to){
+  const out = [];
+  const f = parse(from), t = parse(to);
+  for(const r of S.rules){
+    if(r.paused) continue;
+    if(r.type === 'weekly'){
+      const d = parse(from);
+      while(d <= t){
+        if(d.getDay() === Number(r.weekday)){ const s = ymd(d); out.push({r, key:r.id+'|'+s, start:s, due:s}); }
+        d.setDate(d.getDate()+1);
+      }
+    } else {
+      let cur = new Date(f.getFullYear(), f.getMonth()-1, 1);
+      while(cur <= t){
+        const y = cur.getFullYear(), m = cur.getMonth(), ld = lastDay(y,m);
+        if(r.type === 'monthlyWindow'){
+          const a = ymd(new Date(y, m, Math.min(r.from, ld))), b = ymd(new Date(y, m, Math.min(r.to, ld)));
+          out.push({r, key:`${r.id}|${y}-${pad(m+1)}`, start:a, due:b});
+        } else {
+          const seen = new Set();
+          for(const dd of r.days){
+            const s = ymd(new Date(y, m, Math.min(dd, ld)));
+            if(seen.has(s)) continue; seen.add(s);
+            out.push({r, key:r.id+'|'+s, start:s, due:s});
+          }
+        }
+        cur = new Date(y, m+1, 1);
+      }
+    }
+  }
+  return out.filter(o => o.due >= from && o.start <= to && o.due >= (o.r.createdAt || '0000'))
+            .sort((a,b) => a.due.localeCompare(b.due));
+}
+function occState(o){
+  if(S.done[o.key]) return 'done';
+  const td = today();
+  if(o.due < td) return 'overdue';
+  if(o.start <= td) return 'today';
+  return 'upcoming';
+}
+
+/* ================= متابعات العناصر ================= */
+function alertDate(mod, it){
+  if(mod === 'contracts'){
+    if(!it.end) return null;
+    return addDays(it.end, -(Number(it.warn) || Number(S.settings.contractWarnDays) || 30));
+  }
+  if(mod === 'orders') return null;
+  return it.due || null;
+}
+function itemState(mod, it){
+  if(isClosed(mod, it)) return 'done';
+  const td = today(), a = alertDate(mod, it);
+  if(mod === 'contracts' && it.end && it.end < td) return 'overdue';
+  if(!a) return 'none';
+  if(a < td) return mod === 'contracts' ? 'today' : 'overdue';
+  if(a === td) return 'today';
+  if(a <= addDays(td, 7)) return 'upcoming';
+  return 'later';
+}
+function overdueCount(mod){
+  if(mod === 'orders') return S.items.orders.filter(o => o.status === 'قيد التحضير' && orderLate(o)).length;
+  return S.items[mod].filter(it => ['overdue','today'].includes(itemState(mod, it))).length;
+}
+function orderLate(o){
+  const end = o.ready || nowLocal();
+  return o.received && minsBetween(o.received, end) > Number(S.settings.orderTarget || 30);
+}
+
+/* ================= الواجهة العامة ================= */
+let ui = { tab:'home', filter:{}, q:{}, cal:null };
+const TABS = [
+  ['home','🏠 الرئيسية'], ['cal','📅 الجدول'],
+  ...MOD_KEYS.map(k => [k, `${MODULES[k].icon} ${MODULES[k].title}`]),
+  ['emps','🧑‍⚕️ الموظفين'], ['settings','⚙️ الإعدادات'],
+];
+function renderTabs(){
+  const occ = occurrences(addDays(today(), -60), today()).filter(o => ['overdue','today'].includes(occState(o))).length;
+  document.getElementById('tabs').innerHTML = TABS.map(([k,l]) => {
+    let n = 0;
+    if(k === 'home' || k === 'cal') n = k === 'home' ? occ : 0;
+    else if(MODULES[k]) n = overdueCount(k);
+    return `<button data-act="tab" data-tab="${k}" class="${ui.tab===k?'active':''}">${l}${n?`<span class="dot">${n}</span>`:''}</button>`;
+  }).join('');
+}
+function render(){
+  document.getElementById('todayLbl').textContent = fmt(today()) + ' ' + parse(today()).getFullYear();
+  document.getElementById('branchName').textContent = S.settings.branch ? '— ' + S.settings.branch : '';
+  applyTheme();
+  renderTabs();
+  const v = document.getElementById('view');
+  if(ui.tab === 'home') v.innerHTML = viewHome();
+  else if(ui.tab === 'cal') v.innerHTML = viewCal();
+  else if(ui.tab === 'emps') v.innerHTML = viewEmps();
+  else if(ui.tab === 'settings') v.innerHTML = viewSettings();
+  else { v.innerHTML = viewModule(ui.tab); renderList(ui.tab); }
+}
+function toast(msg){
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+function applyTheme(){
+  const th = S.settings.theme;
+  if(th === 'light' || th === 'dark') document.documentElement.setAttribute('data-theme', th);
+  else document.documentElement.removeAttribute('data-theme');
+}
+
+/* ================= الرئيسية ================= */
+function collectAgenda(){
+  const td = today(), groups = {overdue:[], today:[], upcoming:[]};
+  for(const o of occurrences(addDays(td,-60), addDays(td,7))){
+    const st = occState(o); if(!groups[st]) continue;
+    groups[st].push({kind:'occ', o, sort:o.due});
+  }
+  for(const mod of MOD_KEYS){
+    if(mod === 'orders') continue;
+    for(const it of S.items[mod]){
+      const st = itemState(mod, it); if(!groups[st]) continue;
+      groups[st].push({kind:'item', mod, it, sort: mod === 'contracts' ? it.end : alertDate(mod,it)});
+    }
+  }
+  if(S.items.cash.length){
+    const y = addDays(td,-1);
+    if(!S.items.cash.some(it => it.date === y)) groups.overdue.push({kind:'cashMissing', date:y, sort:y});
+  }
+  Object.values(groups).forEach(g => g.sort((a,b) => (a.sort||'').localeCompare(b.sort||'')));
+  return groups;
+}
+function occCard(o, st){
+  const range = o.start !== o.due ? `من ${fmt(o.start)} إلى ${fmt(o.due)}` : fmt(o.due);
+  let badge;
+  if(st === 'done') badge = `<span class="badge green">✔ تم ${esc(fmt(S.done[o.key]))}</span>`;
+  else if(st === 'overdue') badge = `<span class="badge red">${rel(o.due)}</span>`;
+  else if(st === 'today') badge = `<span class="badge amber">${o.start !== o.due ? 'مفتوح الآن — آخر موعد ' + rel(o.due) : 'اليوم'}</span>`;
+  else badge = `<span class="badge blue">${o.start !== o.due ? 'يبدأ ' + rel(o.start) : rel(o.due)}</span>`;
+  return `<div class="card ${st}">
+    <div class="top"><div class="title">🔁 ${esc(o.r.title)}</div>${badge}</div>
+    <div class="meta"><span class="badge brand">${esc(o.r.cat||'موعد ثابت')}</span> ${range}</div>
+    ${o.r.note ? `<div class="notes">${esc(o.r.note)}</div>` : ''}
+    <div class="actions">${st === 'done'
+      ? `<button class="btn small" data-act="undoOcc" data-key="${esc(o.key)}">↩ إلغاء التنفيذ</button>`
+      : `<button class="btn ok small" data-act="doneOcc" data-key="${esc(o.key)}">✔ تم التنفيذ</button>`}</div>
+  </div>`;
+}
+function itemAgendaCard(mod, it, st){
+  const M = MODULES[mod];
+  let when;
+  if(mod === 'contracts') when = `ينتهي ${fmt(it.end)} (${it.end < today() ? 'انتهى منذ ' + (-diffDays(it.end,today())) + ' يوم' : rel(it.end)})`;
+  else when = `${M.dueLabel||'متابعة'}: ${fmt(alertDate(mod,it))} (${rel(alertDate(mod,it))})`;
+  const cls = st === 'overdue' ? 'red' : st === 'today' ? 'amber' : 'blue';
+  return `<div class="card ${st}">
+    <div class="top"><div class="title">${M.icon} ${esc(M.titleOf(it))}</div><span class="badge ${cls}">${esc(when)}</span></div>
+    <div class="meta"><span class="badge brand">${M.title}</span> <span class="badge">${esc(it.status)}</span> ${metaHtml(mod,it)}</div>
+    ${M.extra ? `<div class="meta">${M.extra(it)}</div>` : ''}
+    <div class="actions">
+      ${statusSelect(mod,it)}
+      <button class="btn small" data-act="edit" data-mod="${mod}" data-id="${it.id}">✏️ فتح</button>
+      <button class="btn small" data-act="snooze" data-mod="${mod}" data-id="${it.id}" title="تأجيل المتابعة ليوم غد">⏰ غداً</button>
+    </div>
+  </div>`;
+}
+function cashMissingCard(d){
+  return `<div class="card overdue"><div class="top"><div class="title">💰 لم تُسجَّل تقفيلة خزينة ${fmt(d)}</div><span class="badge red">ناقصة</span></div>
+    <div class="actions"><button class="btn ok small" data-act="addCash" data-date="${d}">➕ سجّل التقفيلة</button></div></div>`;
+}
+function viewHome(){
+  const g = collectAgenda();
+  const openOrders = S.items.orders.filter(o => o.status === 'قيد التحضير');
+  const lateOrders = openOrders.filter(orderLate);
+  let h = '';
+  if(!storageOk) h += `<div class="banner">⚠️ المتصفح لا يسمح بالحفظ — صدّر نسخة احتياطية من الإعدادات قبل الإغلاق.</div>`;
+  const days = S.lastBackup ? diffDays(today(), S.lastBackup) : null;
+  if(days === null || days >= 7) h += `<div class="banner"><span>💾 ${days === null ? 'لم تعمل نسخة احتياطية بعد.' : 'آخر نسخة احتياطية منذ ' + days + ' يوم.'} البيانات محفوظة على هذا الجهاز فقط.</span><button class="btn small" data-act="export">تصدير نسخة الآن</button></div>`;
+  h += `<div class="tiles">
+    <div class="tile red" data-act="jump" data-to="sec-overdue"><div class="n">${g.overdue.length}</div><div class="l">متأخر</div></div>
+    <div class="tile amber" data-act="jump" data-to="sec-today"><div class="n">${g.today.length}</div><div class="l">مطلوب الآن / اليوم</div></div>
+    <div class="tile blue" data-act="jump" data-to="sec-up"><div class="n">${g.upcoming.length}</div><div class="l">خلال 7 أيام</div></div>
+    <div class="tile ${lateOrders.length?'red':'green'}" data-act="tab" data-tab="orders"><div class="n">${openOrders.length}</div><div class="l">أوردرات تحت التحضير${lateOrders.length?` (${lateOrders.length} متأخر)`:''}</div></div>
+  </div>`;
+  h += `<h2>➕ إضافة سريعة</h2><div class="quick">${MOD_KEYS.map(k => `<button class="btn" data-act="add" data-mod="${k}">${MODULES[k].icon} ${MODULES[k].title}</button>`).join('')}</div>`;
+  if(openOrders.length){
+    h += `<h2>📦 أوردرات تحت التحضير <span class="count">${openOrders.length}</span></h2>`;
+    h += openOrders.map(o => orderCard(o)).join('');
+  }
+  const sec = (id, title, arr, emptyMsg) => `<h2 id="${id}">${title} <span class="count">${arr.length}</span></h2>` +
+    (arr.length ? arr.map(e => e.kind === 'occ' ? occCard(e.o, occState(e.o)) : e.kind === 'cashMissing' ? cashMissingCard(e.date) : itemAgendaCard(e.mod, e.it, itemState(e.mod, e.it))).join('') : `<div class="empty">${emptyMsg}</div>`);
+  h += sec('sec-overdue', '⚠️ متأخر', g.overdue, 'لا يوجد شيء متأخر 👌');
+  h += sec('sec-today', '🔥 مطلوب الآن / اليوم', g.today, 'لا يوجد مطلوب اليوم');
+  h += sec('sec-up', '🗓️ القادم خلال 7 أيام', g.upcoming, 'لا يوجد مواعيد قادمة خلال أسبوع');
+  return h;
+}
+
+/* ================= الجدول الشهري ================= */
+function viewCal(){
+  if(!ui.cal){ const d = new Date(); ui.cal = {y:d.getFullYear(), m:d.getMonth()}; }
+  const {y,m} = ui.cal, from = ymd(new Date(y,m,1)), to = ymd(new Date(y,m,lastDay(y,m)));
+  const entries = [];
+  for(const o of occurrences(from, to)) entries.push({date: o.start < from ? from : o.start, html: occCard(o, occState(o))});
+  for(const mod of MOD_KEYS){
+    if(mod === 'orders') continue;
+    for(const it of S.items[mod]){
+      if(isClosed(mod,it)) continue;
+      const d = mod === 'contracts' ? it.end : alertDate(mod,it);
+      if(d && d >= from && d <= to) entries.push({date:d, html:itemAgendaCard(mod, it, itemState(mod,it) === 'later' ? 'upcoming' : itemState(mod,it))});
+    }
+  }
+  entries.sort((a,b) => a.date.localeCompare(b.date));
+  let h = `<div class="toolbar"><button class="btn" data-act="calNav" data-d="-1">→ الشهر السابق</button>
+    <h2 style="margin:0;flex:1;justify-content:center">${AR_MONTHS[m]} ${y}</h2>
+    <button class="btn" data-act="calNav" data-d="1">الشهر التالي ←</button></div>
+    <p class="hint">كل المواعيد الثابتة والمتابعات في هذا الشهر. المواعيد ذات الفترة (مثل ١٠–١٧) تظهر في يوم بدايتها.</p>`;
+  if(!entries.length) return h + '<div class="empty">لا يوجد مواعيد في هذا الشهر</div>';
+  let last = '';
+  for(const e of entries){
+    if(e.date !== last){ h += `<div class="daygroup ${e.date===today()?'is-today':''}">${fmt(e.date)}${e.date===today()?' (اليوم)':''}</div>`; last = e.date; }
+    h += e.html;
+  }
+  return h;
+}
+
+/* ================= صفحات الأقسام ================= */
+function metaHtml(mod, it){
+  const M = MODULES[mod];
+  return M.metaKeys.filter(k => it[k]).map(k => {
+    const f = fieldOf(mod,k); let v = it[k];
+    if(f.type === 'date') v = fmt(v);
+    if(k === 'priority' && v === 'عاجل') return `<span class="badge red">عاجل</span>`;
+    return `<span>${esc(f.label.split(' /')[0])}: ${esc(v)}</span>`;
+  }).join(' · ');
+}
+function statusSelect(mod, it){
+  return `<select class="inline" data-act-change="status" data-mod="${mod}" data-id="${it.id}">${MODULES[mod].statuses.map(s => `<option ${s===it.status?'selected':''}>${esc(s)}</option>`).join('')}</select>`;
+}
+function historyHtml(it){
+  if(!it.history || !it.history.length) return '';
+  return `<details><summary>السجل (${it.history.length})</summary><ul>${it.history.slice().reverse().map(h => `<li>${esc(h.at.replace('T',' '))} — ${esc(h.text)}</li>`).join('')}</ul></details>`;
+}
+function itemCard(mod, it){
+  if(mod === 'orders') return orderCard(it);
+  const M = MODULES[mod], st = itemState(mod, it);
+  const cls = {overdue:'overdue', today:'today', upcoming:'upcoming', done:'done'}[st] || '';
+  let badge = '';
+  if(mod === 'contracts' && it.end && st !== 'done'){
+    const n = diffDays(it.end, today());
+    badge = `<span class="badge ${n<0?'red':st==='today'?'amber':'green'}">${n<0?'انتهى منذ '+(-n)+' يوم':'ينتهي '+fmt(it.end)+' ('+rel(it.end)+')'}</span>`;
+  } else if(st !== 'done' && alertDate(mod,it)){
+    badge = `<span class="badge ${st==='overdue'?'red':st==='today'?'amber':'blue'}">${M.dueLabel||'متابعة'} ${fmt(alertDate(mod,it))} — ${rel(alertDate(mod,it))}</span>`;
+  } else if(st === 'done') badge = `<span class="badge green">مغلق</span>`;
+  return `<div class="card ${cls}">
+    <div class="top"><div class="title">${esc(M.titleOf(it))}</div>${badge}</div>
+    <div class="meta">${metaHtml(mod,it)}</div>
+    ${M.extra ? `<div class="meta">${M.extra(it)}</div>` : ''}
+    ${it.notes ? `<div class="notes">${esc(it.notes)}</div>` : ''}
+    <div class="actions">
+      ${statusSelect(mod,it)}
+      <button class="btn small" data-act="edit" data-mod="${mod}" data-id="${it.id}">✏️ تعديل</button>
+      ${st !== 'done' && mod !== 'contracts' ? `<button class="btn small" data-act="snooze" data-mod="${mod}" data-id="${it.id}">⏰ غداً</button>` : ''}
+      <button class="btn small danger" data-act="del" data-mod="${mod}" data-id="${it.id}">🗑️</button>
+    </div>
+    ${historyHtml(it)}
+  </div>`;
+}
+function viewModule(mod){
+  const M = MODULES[mod];
+  const f = ui.filter[mod] || 'open';
+  const chips = [['open','المفتوح'],['late','المتأخر / اليوم'],['closed','المغلق'],['all','الكل']];
+  let h = `<div class="toolbar">
+    <h2 style="margin:0">${M.icon} ${M.title}</h2>
+    <span style="flex:1"></span>
+    <button class="btn primary" data-act="add" data-mod="${mod}">➕ إضافة</button>
+  </div>`;
+  if(mod === 'orders') h += orderStats();
+  if(M.header) h += M.header();
+  if(mod === 'hr') h += `<p class="hint">سجّل هنا أي طلب من موظف تحتاج ترفعه لشؤون العاملين، أو أي ورق تطلبه منك شؤون العاملين لموظف، وحدد تاريخ متابعة حتى لا يسقط.</p>`;
+  h += `<div class="toolbar"><input type="search" id="q" placeholder="🔍 بحث..." value="${esc(ui.q[mod]||'')}">
+    <div class="chips">${chips.map(([k,l]) => `<button class="chip ${f===k?'active':''}" data-act="filter" data-mod="${mod}" data-f="${k}">${l}</button>`).join('')}</div></div>
+    <div id="list"></div>`;
+  return h;
+}
+function renderList(mod){
+  const f = ui.filter[mod] || 'open', q = (ui.q[mod] || '').trim().toLowerCase();
+  let arr = S.items[mod].filter(it => {
+    const closed = isClosed(mod, it);
+    if(f === 'open' && closed) return false;
+    if(f === 'closed' && !closed) return false;
+    if(f === 'late'){
+      if(mod === 'orders') { if(!(it.status === 'قيد التحضير' && orderLate(it))) return false; }
+      else if(!['overdue','today'].includes(itemState(mod,it))) return false;
+    }
+    if(q && !JSON.stringify(it).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  if(mod === 'orders') arr.sort((a,b) => (b.received||'').localeCompare(a.received||''));
+  else arr.sort((a,b) => {
+    const ca = isClosed(mod,a), cb = isClosed(mod,b);
+    if(ca !== cb) return ca ? 1 : -1;
+    const da = (mod==='contracts'?a.end:alertDate(mod,a)) || '9999', db = (mod==='contracts'?b.end:alertDate(mod,b)) || '9999';
+    return da.localeCompare(db) || (b.created||'').localeCompare(a.created||'');
+  });
+  const el = document.getElementById('list');
+  el.innerHTML = arr.length ? arr.slice(0, 300).map(it => itemCard(mod, it)).join('') : `<div class="empty">لا يوجد عناصر</div>`;
+}
+
+/* ================= الأوردرات ================= */
+function orderCard(o){
+  const target = Number(S.settings.orderTarget || 30);
+  const prep = o.received && o.ready ? Math.round(minsBetween(o.received, o.ready)) : null;
+  const elapsed = o.received && !o.ready ? Math.round(minsBetween(o.received, nowLocal())) : null;
+  const late = orderLate(o);
+  const closed = isClosed('orders', o);
+  const cls = closed ? 'done' : late ? 'overdue' : o.status === 'جاهز' ? 'upcoming' : 'today';
+  let timeBadge = '';
+  if(prep !== null) timeBadge = `<span class="badge ${prep > target ? 'red' : 'green'}">التحضير: ${prep} دقيقة</span>`;
+  else if(elapsed !== null && o.status !== 'ملغي') timeBadge = `<span class="badge ${late ? 'red' : 'amber'}">منذ ${elapsed} دقيقة</span>`;
+  const times = [o.received && `استلام ${fmt(o.received)} ${fmtTime(o.received)}`, o.ready && `جاهز ${fmtTime(o.ready)}`, o.delivered && `تسليم ${fmtTime(o.delivered)}`].filter(Boolean).join(' · ');
+  return `<div class="card ${cls}">
+    <div class="top"><div class="title">📦 ${esc(MODULES.orders.titleOf(o))}</div>${timeBadge}</div>
+    <div class="meta"><span class="badge">${esc(o.status)}</span> ${metaHtml('orders',o)} ${times ? '· ' + esc(times) : ''}</div>
+    ${o.notes ? `<div class="notes">${esc(o.notes)}</div>` : ''}
+    <div class="actions">
+      ${o.status === 'قيد التحضير' ? `<button class="btn ok small" data-act="orderReady" data-id="${o.id}">✔ جاهز الآن</button>` : ''}
+      ${o.status === 'جاهز' ? `<button class="btn ok small" data-act="orderDeliver" data-id="${o.id}">🚚 تم التسليم</button>` : ''}
+      ${statusSelect('orders',o)}
+      <button class="btn small" data-act="edit" data-mod="orders" data-id="${o.id}">✏️</button>
+      <button class="btn small danger" data-act="del" data-mod="orders" data-id="${o.id}">🗑️</button>
+    </div>
+  </div>`;
+}
+function orderStats(){
+  const target = Number(S.settings.orderTarget || 30);
+  const calc = list => {
+    const t = list.filter(o => o.received && o.ready).map(o => minsBetween(o.received, o.ready));
+    return { n:list.length, avg: t.length ? Math.round(t.reduce((a,b)=>a+b,0)/t.length) : '-', late: t.filter(x => x > target).length, max: t.length ? Math.round(Math.max(...t)) : '-' };
+  };
+  const td = today(), since30 = addDays(td,-30);
+  const todayL = S.items.orders.filter(o => (o.received||'').slice(0,10) === td && o.status !== 'ملغي');
+  const monthL = S.items.orders.filter(o => (o.received||'').slice(0,10) >= since30 && o.status !== 'ملغي');
+  const a = calc(todayL), b = calc(monthL);
+  const byPrep = {};
+  monthL.filter(o => o.preparer && o.ready && o.received).forEach(o => { (byPrep[o.preparer] = byPrep[o.preparer] || []).push(minsBetween(o.received, o.ready)); });
+  const rows = Object.entries(byPrep).map(([p, t]) => ({p, n:t.length, avg:Math.round(t.reduce((x,y)=>x+y,0)/t.length), late:t.filter(x=>x>target).length})).sort((x,y) => x.avg - y.avg);
+  return `<div class="stat-row">
+    <div class="tile"><div class="n">${a.n}</div><div class="l">أوردرات اليوم</div></div>
+    <div class="tile ${a.avg !== '-' && a.avg > target ? 'red' : 'green'}"><div class="n">${a.avg}</div><div class="l">متوسط التحضير اليوم (دقيقة)</div></div>
+    <div class="tile ${a.late ? 'red' : ''}"><div class="n">${a.late}</div><div class="l">تجاوزت ${target} دقيقة اليوم</div></div>
+    <div class="tile"><div class="n">${b.avg}</div><div class="l">متوسط آخر 30 يوم (${b.n} أوردر)</div></div>
+  </div>
+  ${rows.length ? `<details><summary>أداء المُحضِّرين — آخر 30 يوم</summary><table><tr><th>المُحضِّر</th><th>عدد</th><th>متوسط (دقيقة)</th><th>متأخر</th></tr>${rows.map(r => `<tr><td>${esc(r.p)}</td><td>${r.n}</td><td>${r.avg}</td><td>${r.late}</td></tr>`).join('')}</table></details>` : ''}
+  <p class="hint">المستهدف: ${target} دقيقة للتحضير (يمكن تغييره من الإعدادات). اضغط «جاهز الآن» عند انتهاء التحضير ليُحسب الوقت تلقائياً.</p>`;
+}
+
+/* ================= الموظفين ================= */
+function viewEmps(){
+  const openHr = name => S.items.hr.filter(it => it.employee === name && !isClosed('hr', it)).length;
+  let h = `<div class="toolbar"><h2 style="margin:0">🧑‍⚕️ الموظفين</h2><span style="flex:1"></span><button class="btn primary" data-act="addEmp">➕ إضافة موظف</button></div>
+    <p class="hint">أسماء الموظفين تظهر كاقتراحات في طلبات شؤون العاملين والأوردرات.</p>`;
+  if(!S.employees.length) return h + '<div class="empty">لم تتم إضافة موظفين بعد</div>';
+  h += S.employees.map(e => `<div class="card"><div class="top"><div class="title">${esc(e.name)}</div>${openHr(e.name) ? `<span class="badge amber">${openHr(e.name)} طلب مفتوح</span>` : ''}</div>
+    <div class="meta">${[e.job && 'الوظيفة: ' + e.job, e.code && 'الكود: ' + e.code, e.phone && 'تليفون: ' + e.phone].filter(Boolean).map(esc).join(' · ')}</div>
+    ${e.notes ? `<div class="notes">${esc(e.notes)}</div>` : ''}
+    <div class="actions"><button class="btn small" data-act="hrFor" data-name="${esc(e.name)}">👥 طلب شؤون عاملين</button>
+    <button class="btn small" data-act="editEmp" data-id="${e.id}">✏️ تعديل</button>
+    <button class="btn small danger" data-act="delEmp" data-id="${e.id}">🗑️</button></div></div>`).join('');
+  return h;
+}
+
+/* ================= الإعدادات ================= */
+function viewSettings(){
+  const s = S.settings;
+  const notif = ('Notification' in window) ? Notification.permission : 'unsupported';
+  return `<h2>⚙️ الإعدادات</h2>
+  <div class="section"><div class="grid2">
+    <div><label>اسم الفرع</label><input data-set="branch" value="${esc(s.branch)}" placeholder="مثال: فرع رشيد"></div>
+    <div><label>المستهدف لتحضير الأوردر (دقيقة)</label><input type="number" min="1" data-set="orderTarget" value="${esc(s.orderTarget)}"></div>
+    <div><label>التنبيه قبل انتهاء التعاقد افتراضياً (يوم)</label><input type="number" min="1" data-set="contractWarnDays" value="${esc(s.contractWarnDays)}"></div>
+    <div><label>قيمة العهدة (النثريات)</label><input type="number" min="0" data-set="pettyLimit" value="${esc(s.pettyLimit)}"></div>
+    <div><label>المظهر</label><select data-set="theme">${[['auto','تلقائي'],['light','فاتح'],['dark','داكن']].map(([k,l]) => `<option value="${k}" ${s.theme===k?'selected':''}>${l}</option>`).join('')}</select></div>
+  </div></div>
+
+  <h2>🔁 المواعيد الثابتة المتكررة</h2>
+  <p class="hint">هذه المواعيد تظهر تلقائياً كل شهر/أسبوع في الرئيسية، وتبقى «متأخرة» حتى تضغط «تم التنفيذ».</p>
+  ${S.rules.map(r => `<div class="card ${r.paused?'done':''}"><div class="top"><div class="title">${esc(r.title)}</div><span class="badge brand">${esc(r.cat||'')}</span></div>
+    <div class="meta">${ruleDesc(r)}${r.paused?' · <b>متوقف مؤقتاً</b>':''}</div>${r.note?`<div class="notes">${esc(r.note)}</div>`:''}
+    <div class="actions"><button class="btn small" data-act="editRule" data-id="${r.id}">✏️ تعديل</button>
+    <button class="btn small" data-act="pauseRule" data-id="${r.id}">${r.paused?'▶️ تشغيل':'⏸️ إيقاف مؤقت'}</button>
+    <button class="btn small danger" data-act="delRule" data-id="${r.id}">🗑️</button></div></div>`).join('')}
+  <div class="toolbar"><button class="btn primary" data-act="addRule">➕ إضافة موعد ثابت</button></div>
+
+  <h2>📲 التنبيهات والتقويم</h2>
+  <div class="section">
+    <p class="hint">أضمن طريقة للتذكير حتى والتطبيق مغلق: نزّل ملف التقويم وافتحه على الموبايل ليضيف كل المواعيد الثابتة لتقويم جوجل/الآيفون مع منبّه صباح يوم الموعد واليوم السابق له.</p>
+    <div class="toolbar"><button class="btn primary" data-act="ics">📅 تنزيل المواعيد لتقويم الموبايل (.ics)</button>
+    <button class="btn" data-act="notif">${notif === 'granted' ? '🔔 التنبيهات مفعّلة (تجربة)' : notif === 'unsupported' ? '🔕 المتصفح لا يدعم التنبيهات' : '🔔 تفعيل تنبيهات المتصفح'}</button></div>
+    <p class="hint">تنبيهات المتصفح تعمل فقط والتطبيق مفتوح (تذكير كل ساعة بالمتأخر والمطلوب اليوم).</p>
+  </div>
+
+  <h2>💾 النسخ الاحتياطي</h2>
+  <div class="section">
+    <p class="hint">البيانات محفوظة داخل هذا المتصفح على هذا الجهاز. صدّر نسخة كل أسبوع واحفظها (واتساب لنفسك / درايف)، واستوردها لو غيّرت الجهاز.</p>
+    <div class="toolbar"><button class="btn primary" data-act="export">⬇️ تصدير نسخة احتياطية</button>
+    <button class="btn" data-act="import">⬆️ استيراد نسخة</button>
+    <button class="btn" onclick="window.print()">🖨️ طباعة الصفحة</button>
+    <button class="btn danger" data-act="wipe">مسح كل البيانات</button></div>
+    ${S.lastBackup ? `<p class="hint">آخر نسخة: ${fmt(S.lastBackup)}</p>` : ''}
+  </div>`;
+}
+
+/* ================= النماذج ================= */
+const dlg = document.getElementById('dlg'), dlgForm = document.getElementById('dlgForm');
+let dlgSubmit = null;
+function openDialog(title, bodyHtml, onSubmit){
+  const emps = S.employees.map(e => `<option value="${esc(e.name)}">`).join('');
+  dlgForm.innerHTML = `<h3>${title}</h3>${bodyHtml}<datalist id="${EMP_LIST}">${emps}</datalist>
+    <div class="foot"><button type="button" class="btn" data-act="closeDlg">إلغاء</button><button type="submit" class="btn primary">💾 حفظ</button></div>`;
+  dlgSubmit = onSubmit;
+  if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
+  const first = dlgForm.querySelector('input,select,textarea'); if(first) setTimeout(() => first.focus(), 50);
+}
+function closeDialog(){ if(dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+dlgForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const data = {}; new FormData(dlgForm).forEach((v,k) => data[k] = typeof v === 'string' ? v.trim() : v);
+  if(dlgSubmit && dlgSubmit(data) !== false) closeDialog();
+});
+function fieldHtml(f, val){
+  const name = `name="${f.k}" ${f.req ? 'required' : ''}`;
+  let inp;
+  if(f.type === 'select') inp = `<select ${name}>${f.options.map(o => `<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else if(f.type === 'textarea') inp = `<textarea ${name}>${esc(val)}</textarea>`;
+  else {
+    let listAttr = '', dl = '';
+    if(f.list === EMP_LIST) listAttr = `list="${EMP_LIST}"`;
+    else if(f.list){ listAttr = `list="dl_${f.k}"`; dl = `<datalist id="dl_${f.k}">${f.list.map(o => `<option value="${esc(o)}">`).join('')}</datalist>`; }
+    inp = `<input type="${f.type}" ${f.type==='number'?'step="any" inputmode="decimal"':''} ${name} ${listAttr} value="${esc(val)}" autocomplete="off">${dl}`;
+  }
+  return `<div class="${f.full ? 'full' : ''}"><label>${esc(f.label)}${f.req ? ' *' : ''}</label>${inp}</div>`;
+}
+function defVal(f){
+  if(!f.def) return '';
+  if(f.def === 'today') return today();
+  if(f.def === 'now') return nowLocal();
+  if(f.def.startsWith('+')) return addDays(today(), Number(f.def.slice(1)));
+  if(f.def.startsWith('settings.')) return S.settings[f.def.slice(9)];
+  return f.def;
+}
+function openItemForm(mod, id, preset){
+  const M = MODULES[mod];
+  const it = id ? S.items[mod].find(x => x.id === id) : null;
+  const v = k => it ? (it[k] ?? '') : (preset && preset[k] !== undefined ? preset[k] : defVal(fieldOf(mod,k)));
+  const statusF = {k:'status', label:'الحالة', type:'select', options:M.statuses};
+  const body = `<div class="grid2">${fieldHtml(statusF, it ? it.status : M.statuses[0])}${M.fields.map(f => fieldHtml(f, v(f.k))).join('')}</div>`;
+  openDialog(`${M.icon} ${it ? 'تعديل' : 'إضافة'} — ${M.title}`, body, data => {
+    const stamp = nowLocal();
+    if(it){
+      if(it.status !== data.status) logHist(it, `تغيير الحالة: ${it.status} ← ${data.status}`);
+      else logHist(it, 'تعديل البيانات');
+      Object.assign(it, data, {updated:stamp});
+    } else {
+      const n = Object.assign({id:uid(), created:stamp, updated:stamp, history:[]}, data);
+      logHist(n, `إنشاء (${data.status})`);
+      S.items[mod].push(n);
+    }
+    save(); render(); toast('تم الحفظ ✔');
+  });
+}
+function logHist(it, text){ (it.history = it.history || []).push({at:nowLocal(), text}); if(it.history.length > 40) it.history.shift(); }
+function setStatus(mod, id, status){
+  const it = S.items[mod].find(x => x.id === id); if(!it || it.status === status) return;
+  logHist(it, `تغيير الحالة: ${it.status} ← ${status}`);
+  it.status = status; it.updated = nowLocal();
+  if(mod === 'cash' && isClosed('cash', it) && !num(it.deposited)) it.deposited = it.cash;
+  if(mod === 'orders'){
+    if(status === 'جاهز' && !it.ready) it.ready = nowLocal();
+    if(status === 'تم التسليم'){ if(!it.ready) it.ready = nowLocal(); if(!it.delivered) it.delivered = nowLocal(); }
+  }
+  save(); render(); toast('تم تحديث الحالة');
+}
+function openRuleForm(id){
+  const r = id ? S.rules.find(x => x.id === id) : {title:'', cat:'', type:'monthlyWindow', from:1, to:5, days:[1], weekday:2, note:''};
+  const body = `<div class="grid2">
+    <div class="full"><label>اسم المطلوب *</label><input name="title" required value="${esc(r.title)}"></div>
+    <div><label>الجهة / التصنيف</label><input name="cat" list="dl_rcat" value="${esc(r.cat)}"><datalist id="dl_rcat">${['شؤون العاملين','المشتريات','المعمل','الحسابات','الإدارة','الجودة','الصيانة'].map(x=>`<option value="${x}">`).join('')}</datalist></div>
+    <div><label>نوع التكرار</label><select name="type" id="rtype">
+      <option value="monthlyWindow" ${r.type==='monthlyWindow'?'selected':''}>فترة شهرية (من يوم إلى يوم)</option>
+      <option value="monthlyDays" ${r.type==='monthlyDays'?'selected':''}>أيام محددة في الشهر</option>
+      <option value="weekly" ${r.type==='weekly'?'selected':''}>أسبوعي</option></select></div>
+    <div data-rt="monthlyWindow"><label>من يوم</label><input type="number" min="1" max="31" name="from" value="${esc(r.from ?? 1)}"></div>
+    <div data-rt="monthlyWindow"><label>إلى يوم</label><input type="number" min="1" max="31" name="to" value="${esc(r.to ?? 5)}"></div>
+    <div data-rt="monthlyDays" class="full"><label>الأيام (افصل بينها بفاصلة، 31 = آخر الشهر)</label><input name="days" value="${esc((r.days||[]).join(', '))}" placeholder="10, 21, 31"></div>
+    <div data-rt="weekly"><label>يوم الأسبوع</label><select name="weekday">${AR_DAYS.map((d,i) => `<option value="${i}" ${Number(r.weekday)===i?'selected':''}>${d}</option>`).join('')}</select></div>
+    <div class="full"><label>ملاحظة (لمن يُرسل، الطريقة...)</label><textarea name="note">${esc(r.note||'')}</textarea></div>
+  </div>`;
+  openDialog(id ? '✏️ تعديل موعد ثابت' : '➕ موعد ثابت جديد', body, d => {
+    const nr = {title:d.title, cat:d.cat, type:d.type, note:d.note};
+    if(d.type === 'monthlyWindow'){
+      nr.from = Math.max(1, Math.min(31, parseInt(d.from)||1)); nr.to = Math.max(1, Math.min(31, parseInt(d.to)||nr.from));
+      if(nr.to < nr.from){ alert('«إلى يوم» يجب أن يكون بعد «من يوم»'); return false; }
+    } else if(d.type === 'monthlyDays'){
+      nr.days = [...new Set(String(d.days).split(/[,،\s]+/).map(Number).filter(n => n >= 1 && n <= 31))].sort((a,b)=>a-b);
+      if(!nr.days.length){ alert('اكتب يوماً واحداً على الأقل'); return false; }
+    } else nr.weekday = Number(d.weekday);
+    if(id){ const old = S.rules.find(x => x.id === id); Object.keys(old).forEach(k => { if(!['id','createdAt','paused'].includes(k)) delete old[k]; }); Object.assign(old, nr); }
+    else S.rules.push(Object.assign({id:'r_'+uid(), createdAt:today()}, nr));
+    save(); render(); toast('تم حفظ الموعد');
+  });
+  const sync = () => { const t = document.getElementById('rtype').value; dlgForm.querySelectorAll('[data-rt]').forEach(el => el.style.display = el.dataset.rt === t ? '' : 'none'); };
+  document.getElementById('rtype').addEventListener('change', sync); sync();
+}
+function openEmpForm(id, preset){
+  const e = id ? S.employees.find(x => x.id === id) : (preset || {});
+  const body = `<div class="grid2">
+    <div class="full"><label>الاسم *</label><input name="name" required value="${esc(e.name||'')}"></div>
+    <div><label>الوظيفة</label><input name="job" list="dl_job" value="${esc(e.job||'')}"><datalist id="dl_job">${['صيدلي','صيدلي مدير','مساعد صيدلي','كاشير','دليفري','عامل نظافة','أمن'].map(x=>`<option value="${x}">`).join('')}</datalist></div>
+    <div><label>الكود</label><input name="code" value="${esc(e.code||'')}"></div>
+    <div><label>التليفون</label><input name="phone" type="tel" value="${esc(e.phone||'')}"></div>
+    <div class="full"><label>ملاحظات</label><textarea name="notes">${esc(e.notes||'')}</textarea></div></div>`;
+  openDialog(id ? '✏️ تعديل موظف' : '➕ موظف جديد', body, d => {
+    if(id) Object.assign(e, d); else S.employees.push(Object.assign({id:uid()}, d));
+    S.employees.sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+    save(); render(); toast('تم الحفظ');
+  });
+}
+
+/* ================= تصدير / استيراد / تقويم ================= */
+function download(name, text, type){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type}));
+  a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function exportData(){
+  S.lastBackup = today(); save();
+  download(`نسخة-مدير-الصيدلية-${today()}.json`, JSON.stringify(S, null, 1), 'application/json');
+  render(); toast('تم تصدير النسخة');
+}
+document.getElementById('importFile').addEventListener('change', e => {
+  const file = e.target.files[0]; if(!file) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const d = JSON.parse(rd.result);
+      if(!d.items || !d.rules) throw new Error('bad');
+      if(!confirm('سيتم استبدال البيانات الحالية بالنسخة المستوردة. متابعة؟')) return;
+      S = normalize(d);
+      save(); render(); toast('تم الاستيراد ✔');
+    } catch(err){ alert('الملف غير صالح'); }
+    e.target.value = '';
+  };
+  rd.readAsText(file);
+});
+function icsDate(s){ return s.replace(/-/g,''); }
+function exportIcs(){
+  const td = today(), stamp = new Date().toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z';
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//pharmacy-manager//AR','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:مواعيد الصيدلية'];
+  const alarm = (trig, txt) => ['BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${txt}`,`TRIGGER:${trig}`,'END:VALARM'];
+  const icsEsc = s => String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  for(const r of S.rules){
+    if(r.paused) continue;
+    const first = occurrences(td, addDays(td, 70)).find(o => o.r.id === r.id);
+    if(!first) continue;
+    let rrule, dtend;
+    if(r.type === 'weekly'){ rrule = `FREQ=WEEKLY;BYDAY=${['SU','MO','TU','WE','TH','FR','SA'][r.weekday]}`; dtend = addDays(first.start,1); }
+    else if(r.type === 'monthlyWindow'){ rrule = `FREQ=MONTHLY;BYMONTHDAY=${r.from}`; dtend = addDays(first.start, r.to - r.from + 1); }
+    else { rrule = `FREQ=MONTHLY;BYMONTHDAY=${r.days.map(d => d >= 31 ? -1 : d).join(',')}`; dtend = addDays(first.start,1); }
+    const desc = `${ruleDesc(r)}${r.note ? ' — ' + r.note : ''}`;
+    lines.push('BEGIN:VEVENT', `UID:${r.id}@pharmacy-manager`, `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${icsDate(first.start)}`, `DTEND;VALUE=DATE:${icsDate(dtend)}`, `RRULE:${rrule}`,
+      `SUMMARY:${icsEsc('💊 ' + r.title)}`, `DESCRIPTION:${icsEsc(desc)}`, 'TRANSP:TRANSPARENT',
+      ...alarm('-PT15H', icsEsc('غداً: ' + r.title)), ...alarm('PT9H', icsEsc('اليوم: ' + r.title)));
+    if(r.type === 'monthlyWindow' && r.to > r.from) lines.push(...alarm(`P${r.to - r.from}DT9H`, icsEsc('آخر يوم: ' + r.title)));
+    lines.push('END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+  download('مواعيد-الصيدلية.ics', lines.join('\r\n'), 'text/calendar');
+  toast('افتح الملف على الموبايل لإضافته للتقويم');
+}
+
+/* ================= تنبيهات المتصفح ================= */
+function notifyCheck(force){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  const g = collectAgenda();
+  const n = g.overdue.length + g.today.length;
+  if(!n && !force) return;
+  const titles = [...g.overdue, ...g.today].slice(0,4).map(e => e.kind === 'occ' ? e.o.r.title : MODULES[e.mod].titleOf(e.it));
+  try { new Notification('💊 مدير الصيدلية', {body: n ? `${g.overdue.length} متأخر و ${g.today.length} مطلوب اليوم:\n` + titles.join('\n') : 'لا يوجد مطلوب الآن 👌', tag:'pm-daily'}); } catch(e){}
+}
+
+/* ================= الأحداث ================= */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const a = b.dataset.act, mod = b.dataset.mod, id = b.dataset.id;
+  switch(a){
+    case 'tab': ui.tab = b.dataset.tab; render(); window.scrollTo(0,0); break;
+    case 'jump': { const el = document.getElementById(b.dataset.to); if(el) el.scrollIntoView({behavior:'smooth', block:'start'}); break; }
+    case 'add': openItemForm(mod); break;
+    case 'edit': openItemForm(mod, id); break;
+    case 'del': if(confirm('حذف هذا العنصر نهائياً؟')){ S.items[mod] = S.items[mod].filter(x => x.id !== id); save(); render(); } break;
+    case 'snooze': { const it = S.items[mod].find(x => x.id === id); if(it){ it.due = addDays(today(),1); logHist(it,'تأجيل المتابعة لـ ' + it.due); save(); render(); toast('تم التأجيل لغداً'); } break; }
+    case 'filter': ui.filter[mod] = b.dataset.f; render(); break;
+    case 'doneOcc': S.done[b.dataset.key] = today(); save(); render(); toast('أحسنت ✔'); break;
+    case 'undoOcc': delete S.done[b.dataset.key]; save(); render(); break;
+    case 'calNav': { const d = new Date(ui.cal.y, ui.cal.m + Number(b.dataset.d), 1); ui.cal = {y:d.getFullYear(), m:d.getMonth()}; render(); break; }
+    case 'orderReady': setStatus('orders', id, 'جاهز'); break;
+    case 'orderDeliver': setStatus('orders', id, 'تم التسليم'); break;
+    case 'addEmp': openEmpForm(); break;
+    case 'editEmp': openEmpForm(id); break;
+    case 'delEmp': if(confirm('حذف الموظف؟')){ S.employees = S.employees.filter(x => x.id !== id); save(); render(); } break;
+    case 'addCash': openItemForm('cash', null, {date:b.dataset.date, due:today()}); break;
+    case 'hrFor': openItemForm('hr', null, {employee:b.dataset.name}); break;
+    case 'addRule': openRuleForm(); break;
+    case 'editRule': openRuleForm(id); break;
+    case 'pauseRule': { const r = S.rules.find(x => x.id === id); r.paused = !r.paused; save(); render(); break; }
+    case 'delRule': if(confirm('حذف هذا الموعد الثابت؟')){ S.rules = S.rules.filter(x => x.id !== id); save(); render(); } break;
+    case 'export': exportData(); break;
+    case 'import': document.getElementById('importFile').click(); break;
+    case 'ics': exportIcs(); break;
+    case 'notif':
+      if(!('Notification' in window)) return;
+      Notification.requestPermission().then(p => { render(); if(p === 'granted') notifyCheck(true); });
+      break;
+    case 'wipe':
+      if(confirm('سيتم مسح كل البيانات من هذا الجهاز. هل صدّرت نسخة احتياطية؟') && confirm('تأكيد نهائي: مسح كل شيء؟')){ S = blankState(); save(); render(); }
+      break;
+    case 'closeDlg': closeDialog(); break;
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.dataset.actChange === 'status') setStatus(t.dataset.mod, t.dataset.id, t.value);
+  else if(t.dataset.set){
+    S.settings[t.dataset.set] = t.type === 'number' ? Number(t.value) : t.value;
+    save(); render(); toast('تم الحفظ');
+  }
+});
+document.addEventListener('input', e => {
+  if(e.target.id === 'q' && MODULES[ui.tab]){ ui.q[ui.tab] = e.target.value; renderList(ui.tab); }
+});
+
+/* ================= التشغيل ================= */
+load();
+save();
+render();
+let lastDay_ = today();
+setInterval(() => {
+  // تحديث العدادات (الأوردرات المتأخرة) وتغيّر اليوم
+  if(!dlg.open && document.activeElement?.id !== 'q' && !document.activeElement?.dataset?.set) render();
+  if(today() !== lastDay_){ lastDay_ = today(); }
+}, 60000);
+setTimeout(() => notifyCheck(false), 3000);
+setInterval(() => notifyCheck(false), 3600000);
+</script>
+</body>
+</html>
