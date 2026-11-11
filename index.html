@@ -141,6 +141,9 @@ function rel(due){
   return `بعد ${n} يوم`;
 }
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+const money = v => num(v).toLocaleString('en-US', {maximumFractionDigits:2});
+const cashDiff = it => num(it.cash) + num(it.cards) + num(it.credit) + num(it.expenses) - num(it.system);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 
 /* ================= تعريف الأقسام ================= */
@@ -196,6 +199,110 @@ const MODULES = {
     ],
     titleOf: it => `أوردر ${it.num ? '#' + it.num : ''} ${it.customer ? '— ' + it.customer : ''}`,
     metaKeys:['channel','preparer'],
+  },
+  inventory: {
+    title:'الجرد', icon:'📋', dueLabel:'التسليم',
+    statuses:['مخطط','جاري','تم — بانتظار التسوية','تمت التسوية / مغلق'],
+    closed:['تمت التسوية / مغلق'],
+    fields:[
+      {k:'type', label:'نوع الجرد', type:'text', req:true, list:['جرد شهري','جرد سنوي','جرد مفاجئ','جرد جزئي (مجموعة / رف)','جرد ثلاجة','جرد جداول ومخدرات','جرد مستهلكات','جرد خزينة','جرد مستلزمات / تجميل']},
+      {k:'scope', label:'النطاق (أصناف / رفوف / مجموعة)', type:'text'},
+      {k:'date', label:'تاريخ الجرد', type:'date', def:'today'},
+      {k:'team', label:'القائم بالجرد / لجنة الجرد', type:'text'},
+      {k:'due', label:'موعد تسليم النتيجة / التسوية', type:'date', def:'+2'},
+      {k:'diffCount', label:'عدد الأصناف بها فروق', type:'number'},
+      {k:'shortage', label:'قيمة العجز', type:'number'},
+      {k:'surplus', label:'قيمة الزيادة', type:'number'},
+      {k:'notes', label:'ملاحظات وأسباب الفروق', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.type || 'جرد'}${it.scope ? ' — ' + it.scope : ''}`,
+    metaKeys:['date','team','diffCount'],
+    extra: it => {
+      const sh = num(it.shortage), su = num(it.surplus);
+      return (sh ? `<span class="badge red">عجز ${money(sh)}</span> ` : '') + (su ? `<span class="badge blue">زيادة ${money(su)}</span> ` : '') + (sh - su ? `<span class="badge ${sh>su?'red':'green'}">الصافي ${sh>su?'عجز':'زيادة'} ${money(Math.abs(sh-su))}</span>` : '');
+    },
+    header: () => {
+      const y = String(new Date().getFullYear());
+      const list = S.items.inventory.filter(it => (it.date||'').startsWith(y));
+      const sh = list.reduce((a,it) => a + num(it.shortage), 0), su = list.reduce((a,it) => a + num(it.surplus), 0);
+      const lastDone = S.items.inventory.filter(it => isClosed('inventory',it) || it.status.startsWith('تم')).map(it => it.date).sort().pop();
+      return `<div class="stat-row">
+        <div class="tile"><div class="n">${list.length}</div><div class="l">عمليات جرد ${y}</div></div>
+        <div class="tile red"><div class="n">${money(sh)}</div><div class="l">إجمالي العجز ${y}</div></div>
+        <div class="tile blue"><div class="n">${money(su)}</div><div class="l">إجمالي الزيادة ${y}</div></div>
+        <div class="tile"><div class="n" style="font-size:16px">${lastDone ? fmt(lastDone) : '-'}</div><div class="l">آخر جرد منتهي</div></div>
+      </div><p class="hint">لو عندك ميعاد جرد ثابت كل شهر، أضفه من الإعدادات ← المواعيد الثابتة.</p>`;
+    },
+  },
+  cash: {
+    title:'الخزينة والنقدية', icon:'💰', dueLabel:'التوريد',
+    statuses:['لم يتم التوريد','تم التوريد / مغلق'],
+    closed:['تم التوريد / مغلق'],
+    fields:[
+      {k:'date', label:'تاريخ التقفيلة', type:'date', def:'today', req:true},
+      {k:'shift', label:'الوردية', type:'select', options:['يوم كامل','صباحي','مسائي','ليلي']},
+      {k:'cashier', label:'الكاشير / المسؤول', type:'text', list:EMP_LIST},
+      {k:'system', label:'إجمالي مبيعات السيستم', type:'number', req:true},
+      {k:'cash', label:'النقدية الفعلية بالدرج', type:'number'},
+      {k:'cards', label:'فيزا / محافظ / إنستاباي', type:'number'},
+      {k:'credit', label:'آجل / تأمين / تعاقدات', type:'number'},
+      {k:'expenses', label:'مصروفات دُفعت من الدرج', type:'number'},
+      {k:'deposited', label:'المبلغ المورّد', type:'number'},
+      {k:'depositRef', label:'رقم إيصال التوريد / لمن', type:'text'},
+      {k:'due', label:'موعد التوريد', type:'date', def:'today'},
+      {k:'notes', label:'ملاحظات (سبب العجز / الزيادة...)', type:'textarea', full:true},
+    ],
+    titleOf: it => `تقفيلة ${fmt(it.date)} — ${it.shift || ''}`,
+    metaKeys:['cashier','depositRef'],
+    extra: it => {
+      const d = cashDiff(it);
+      return `<span>السيستم: ${money(it.system)}</span> · <span>نقدي: ${money(it.cash)}</span>${num(it.cards)?` · <span>فيزا/محافظ: ${money(it.cards)}</span>`:''}${num(it.credit)?` · <span>آجل: ${money(it.credit)}</span>`:''}${num(it.expenses)?` · <span>مصروفات: ${money(it.expenses)}</span>`:''}${num(it.deposited)?` · <span>مورّد: ${money(it.deposited)}</span>`:''}
+        <span class="badge ${Math.abs(d)<0.01?'green':d<0?'red':'blue'}">${Math.abs(d)<0.01?'مطابق ✔':d<0?'عجز '+money(-d):'زيادة '+money(d)}</span>`;
+    },
+    header: () => {
+      const m = today().slice(0,7);
+      const list = S.items.cash.filter(it => (it.date||'').startsWith(m));
+      const sales = list.reduce((a,it) => a + num(it.system), 0);
+      const diffs = list.map(cashDiff);
+      const short = diffs.filter(d => d < 0).reduce((a,b) => a - b, 0), over = diffs.filter(d => d > 0).reduce((a,b) => a + b, 0);
+      const pend = S.items.cash.filter(it => !isClosed('cash',it));
+      const pendAmt = pend.reduce((a,it) => a + Math.max(0, num(it.cash) - num(it.deposited)), 0);
+      return `<div class="stat-row">
+        <div class="tile"><div class="n">${money(sales)}</div><div class="l">مبيعات الشهر (${list.length} تقفيلة)</div></div>
+        <div class="tile ${short?'red':'green'}"><div class="n">${money(short)}</div><div class="l">إجمالي العجز هذا الشهر</div></div>
+        <div class="tile blue"><div class="n">${money(over)}</div><div class="l">إجمالي الزيادة هذا الشهر</div></div>
+        <div class="tile ${pend.length?'amber':'green'}"><div class="n">${money(pendAmt)}</div><div class="l">نقدية لم تُورَّد (${pend.length})</div></div>
+      </div><p class="hint">الفرق = النقدي + الفيزا/المحافظ + الآجل + المصروفات − مبيعات السيستم. سجّل تقفيلة كل يوم، والتطبيق ينبّهك لو يوم فات من غير تقفيلة أو نقدية متأخرة في التوريد.</p>`;
+    },
+  },
+  petty: {
+    title:'العهدة والنثريات', icon:'🧾', dueLabel:'التسوية',
+    statuses:['لم تُسوَّ','أُرسلت للتسوية','تمت التسوية / مغلق'],
+    closed:['تمت التسوية / مغلق'],
+    fields:[
+      {k:'item', label:'البند', type:'text', req:true},
+      {k:'amount', label:'المبلغ', type:'number', req:true},
+      {k:'cat', label:'التصنيف', type:'text', list:['نظافة','بوفيه / ضيافة','مواصلات','دليفري','صيانة بسيطة','أدوات مكتبية','تصوير / طباعة','كهرباء / مياه','أخرى']},
+      {k:'date', label:'التاريخ', type:'date', def:'today'},
+      {k:'receipt', label:'الإيصال', type:'select', options:['يوجد إيصال','لا يوجد إيصال']},
+      {k:'due', label:'موعد إرسال التسوية', type:'date'},
+      {k:'notes', label:'ملاحظات', type:'textarea', full:true},
+    ],
+    titleOf: it => `${it.item || ''} — ${money(it.amount)}`,
+    metaKeys:['cat','date','receipt'],
+    extra: it => it.receipt === 'لا يوجد إيصال' ? '<span class="badge amber">بدون إيصال</span>' : '',
+    header: () => {
+      const limit = num(S.settings.pettyLimit);
+      const unsettled = S.items.petty.filter(it => !isClosed('petty',it)).reduce((a,it) => a + num(it.amount), 0);
+      const rem = limit - unsettled;
+      const noRec = S.items.petty.filter(it => !isClosed('petty',it) && it.receipt === 'لا يوجد إيصال').length;
+      return `<div class="stat-row">
+        <div class="tile"><div class="n">${money(limit)}</div><div class="l">قيمة العهدة</div></div>
+        <div class="tile amber"><div class="n">${money(unsettled)}</div><div class="l">مصروف لم يُسوَّ</div></div>
+        <div class="tile ${limit && rem < limit*0.2 ? 'red' : 'green'}"><div class="n">${money(rem)}</div><div class="l">المتبقي في العهدة${limit && rem < limit*0.2 ? ' — اعمل تسوية' : ''}</div></div>
+        <div class="tile ${noRec?'red':''}"><div class="n">${noRec}</div><div class="l">بنود بدون إيصال</div></div>
+      </div><p class="hint">حدد قيمة العهدة من الإعدادات. لما ترسل التسوية غيّر حالة البنود إلى «أُرسلت للتسوية»، ولما تستلم المبلغ اجعلها «تمت التسوية».</p>`;
+    },
   },
   maintenance: {
     title:'الصيانة', icon:'🔧',
@@ -275,7 +382,7 @@ const STORE_KEY = 'pharmacy_manager_v1';
 let S;
 function blankState(){
   const items = {}; MOD_KEYS.forEach(k => items[k] = []);
-  return { rules: defaultRules(), done:{}, items, employees:[], settings:{branch:'', orderTarget:30, contractWarnDays:30, theme:'auto'}, lastBackup:null };
+  return { rules: defaultRules(), done:{}, items, employees:[], settings:{branch:'', orderTarget:30, contractWarnDays:30, pettyLimit:0, theme:'auto'}, lastBackup:null };
 }
 function load(){
   let raw = null;
@@ -419,6 +526,10 @@ function collectAgenda(){
       groups[st].push({kind:'item', mod, it, sort: mod === 'contracts' ? it.end : alertDate(mod,it)});
     }
   }
+  if(S.items.cash.length){
+    const y = addDays(td,-1);
+    if(!S.items.cash.some(it => it.date === y)) groups.overdue.push({kind:'cashMissing', date:y, sort:y});
+  }
   Object.values(groups).forEach(g => g.sort((a,b) => (a.sort||'').localeCompare(b.sort||'')));
   return groups;
 }
@@ -442,17 +553,22 @@ function itemAgendaCard(mod, it, st){
   const M = MODULES[mod];
   let when;
   if(mod === 'contracts') when = `ينتهي ${fmt(it.end)} (${it.end < today() ? 'انتهى منذ ' + (-diffDays(it.end,today())) + ' يوم' : rel(it.end)})`;
-  else when = `متابعة: ${fmt(alertDate(mod,it))} (${rel(alertDate(mod,it))})`;
+  else when = `${M.dueLabel||'متابعة'}: ${fmt(alertDate(mod,it))} (${rel(alertDate(mod,it))})`;
   const cls = st === 'overdue' ? 'red' : st === 'today' ? 'amber' : 'blue';
   return `<div class="card ${st}">
     <div class="top"><div class="title">${M.icon} ${esc(M.titleOf(it))}</div><span class="badge ${cls}">${esc(when)}</span></div>
     <div class="meta"><span class="badge brand">${M.title}</span> <span class="badge">${esc(it.status)}</span> ${metaHtml(mod,it)}</div>
+    ${M.extra ? `<div class="meta">${M.extra(it)}</div>` : ''}
     <div class="actions">
       ${statusSelect(mod,it)}
       <button class="btn small" data-act="edit" data-mod="${mod}" data-id="${it.id}">✏️ فتح</button>
       <button class="btn small" data-act="snooze" data-mod="${mod}" data-id="${it.id}" title="تأجيل المتابعة ليوم غد">⏰ غداً</button>
     </div>
   </div>`;
+}
+function cashMissingCard(d){
+  return `<div class="card overdue"><div class="top"><div class="title">💰 لم تُسجَّل تقفيلة خزينة ${fmt(d)}</div><span class="badge red">ناقصة</span></div>
+    <div class="actions"><button class="btn ok small" data-act="addCash" data-date="${d}">➕ سجّل التقفيلة</button></div></div>`;
 }
 function viewHome(){
   const g = collectAgenda();
@@ -474,7 +590,7 @@ function viewHome(){
     h += openOrders.map(o => orderCard(o)).join('');
   }
   const sec = (id, title, arr, emptyMsg) => `<h2 id="${id}">${title} <span class="count">${arr.length}</span></h2>` +
-    (arr.length ? arr.map(e => e.kind === 'occ' ? occCard(e.o, occState(e.o)) : itemAgendaCard(e.mod, e.it, itemState(e.mod, e.it))).join('') : `<div class="empty">${emptyMsg}</div>`);
+    (arr.length ? arr.map(e => e.kind === 'occ' ? occCard(e.o, occState(e.o)) : e.kind === 'cashMissing' ? cashMissingCard(e.date) : itemAgendaCard(e.mod, e.it, itemState(e.mod, e.it))).join('') : `<div class="empty">${emptyMsg}</div>`);
   h += sec('sec-overdue', '⚠️ متأخر', g.overdue, 'لا يوجد شيء متأخر 👌');
   h += sec('sec-today', '🔥 مطلوب الآن / اليوم', g.today, 'لا يوجد مطلوب اليوم');
   h += sec('sec-up', '🗓️ القادم خلال 7 أيام', g.upcoming, 'لا يوجد مواعيد قادمة خلال أسبوع');
@@ -535,11 +651,12 @@ function itemCard(mod, it){
     const n = diffDays(it.end, today());
     badge = `<span class="badge ${n<0?'red':st==='today'?'amber':'green'}">${n<0?'انتهى منذ '+(-n)+' يوم':'ينتهي '+fmt(it.end)+' ('+rel(it.end)+')'}</span>`;
   } else if(st !== 'done' && alertDate(mod,it)){
-    badge = `<span class="badge ${st==='overdue'?'red':st==='today'?'amber':'blue'}">متابعة ${fmt(alertDate(mod,it))} — ${rel(alertDate(mod,it))}</span>`;
+    badge = `<span class="badge ${st==='overdue'?'red':st==='today'?'amber':'blue'}">${M.dueLabel||'متابعة'} ${fmt(alertDate(mod,it))} — ${rel(alertDate(mod,it))}</span>`;
   } else if(st === 'done') badge = `<span class="badge green">مغلق</span>`;
   return `<div class="card ${cls}">
     <div class="top"><div class="title">${esc(M.titleOf(it))}</div>${badge}</div>
     <div class="meta">${metaHtml(mod,it)}</div>
+    ${M.extra ? `<div class="meta">${M.extra(it)}</div>` : ''}
     ${it.notes ? `<div class="notes">${esc(it.notes)}</div>` : ''}
     <div class="actions">
       ${statusSelect(mod,it)}
@@ -560,6 +677,7 @@ function viewModule(mod){
     <button class="btn primary" data-act="add" data-mod="${mod}">➕ إضافة</button>
   </div>`;
   if(mod === 'orders') h += orderStats();
+  if(M.header) h += M.header();
   if(mod === 'hr') h += `<p class="hint">سجّل هنا أي طلب من موظف تحتاج ترفعه لشؤون العاملين، أو أي ورق تطلبه منك شؤون العاملين لموظف، وحدد تاريخ متابعة حتى لا يسقط.</p>`;
   h += `<div class="toolbar"><input type="search" id="q" placeholder="🔍 بحث..." value="${esc(ui.q[mod]||'')}">
     <div class="chips">${chips.map(([k,l]) => `<button class="chip ${f===k?'active':''}" data-act="filter" data-mod="${mod}" data-f="${k}">${l}</button>`).join('')}</div></div>
@@ -662,6 +780,7 @@ function viewSettings(){
     <div><label>اسم الفرع</label><input data-set="branch" value="${esc(s.branch)}" placeholder="مثال: فرع رشيد"></div>
     <div><label>المستهدف لتحضير الأوردر (دقيقة)</label><input type="number" min="1" data-set="orderTarget" value="${esc(s.orderTarget)}"></div>
     <div><label>التنبيه قبل انتهاء التعاقد افتراضياً (يوم)</label><input type="number" min="1" data-set="contractWarnDays" value="${esc(s.contractWarnDays)}"></div>
+    <div><label>قيمة العهدة (النثريات)</label><input type="number" min="0" data-set="pettyLimit" value="${esc(s.pettyLimit)}"></div>
     <div><label>المظهر</label><select data-set="theme">${[['auto','تلقائي'],['light','فاتح'],['dark','داكن']].map(([k,l]) => `<option value="${k}" ${s.theme===k?'selected':''}>${l}</option>`).join('')}</select></div>
   </div></div>
 
@@ -719,7 +838,7 @@ function fieldHtml(f, val){
     let listAttr = '', dl = '';
     if(f.list === EMP_LIST) listAttr = `list="${EMP_LIST}"`;
     else if(f.list){ listAttr = `list="dl_${f.k}"`; dl = `<datalist id="dl_${f.k}">${f.list.map(o => `<option value="${esc(o)}">`).join('')}</datalist>`; }
-    inp = `<input type="${f.type}" ${name} ${listAttr} value="${esc(val)}" autocomplete="off">${dl}`;
+    inp = `<input type="${f.type}" ${f.type==='number'?'step="any" inputmode="decimal"':''} ${name} ${listAttr} value="${esc(val)}" autocomplete="off">${dl}`;
   }
   return `<div class="${f.full ? 'full' : ''}"><label>${esc(f.label)}${f.req ? ' *' : ''}</label>${inp}</div>`;
 }
@@ -756,6 +875,7 @@ function setStatus(mod, id, status){
   const it = S.items[mod].find(x => x.id === id); if(!it || it.status === status) return;
   logHist(it, `تغيير الحالة: ${it.status} ← ${status}`);
   it.status = status; it.updated = nowLocal();
+  if(mod === 'cash' && isClosed('cash', it) && !num(it.deposited)) it.deposited = it.cash;
   if(mod === 'orders'){
     if(status === 'جاهز' && !it.ready) it.ready = nowLocal();
     if(status === 'تم التسليم'){ if(!it.ready) it.ready = nowLocal(); if(!it.delivered) it.delivered = nowLocal(); }
@@ -892,6 +1012,7 @@ document.addEventListener('click', e => {
     case 'addEmp': openEmpForm(); break;
     case 'editEmp': openEmpForm(id); break;
     case 'delEmp': if(confirm('حذف الموظف؟')){ S.employees = S.employees.filter(x => x.id !== id); save(); render(); } break;
+    case 'addCash': openItemForm('cash', null, {date:b.dataset.date, due:today()}); break;
     case 'hrFor': openItemForm('hr', null, {employee:b.dataset.name}); break;
     case 'addRule': openRuleForm(); break;
     case 'editRule': openRuleForm(id); break;
